@@ -6,7 +6,7 @@ import styles from "@/components/HomeDashboard.module.css";
 import { ReportsList } from "@/components/ReportsList";
 import { StatusPanel } from "@/components/StatusPanel";
 import { TimerCard } from "@/components/TimerCard";
-import type { StatusApiResponse, StatusResponse } from "@/lib/types";
+import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
 
 const REFRESH_INTERVAL_MS = 60_000;
 
@@ -17,7 +17,7 @@ interface DashboardState {
   fetchedAt: string | null;
 }
 
-async function fetchStatus(signal?: AbortSignal): Promise<StatusApiResponse> {
+async function fetchStatus(signal?: AbortSignal): Promise<StatusApiSuccess> {
   const response = await fetch("/api/status", {
     method: "GET",
     headers: {
