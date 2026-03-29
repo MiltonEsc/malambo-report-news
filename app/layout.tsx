@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Malambo sin homicidios o intentos recientes",
     description:
-      "Consulta el tiempo transcurrido desde el último evento violento reciente detectado por la automatización.",
+      "Consulta el tiempo transcurrido desde el último evento violento reciente detectado.",
     locale: "es_CO",
     type: "website"
   },

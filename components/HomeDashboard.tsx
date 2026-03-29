@@ -141,7 +141,7 @@ export function HomeDashboard() {
 
             <p className={styles.intro}>
               Este panel consulta un proxy interno cada 60 segundos para actualizar el estado
-              público sin exponer directamente el webhook de n8n al navegador.
+              público.
             </p>
 
             <section className={styles.grid} aria-label="Detalle del monitoreo">
