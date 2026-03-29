@@ -1,0 +1,87 @@
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.title {
+  margin: 1rem 0 0.65rem;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  line-height: 1.06;
+}
+
+.description {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.clockWrap {
+  margin-top: 1.8rem;
+  padding: 1.6rem;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(35, 76, 107, 0.08), rgba(47, 111, 83, 0.06)),
+    var(--surface-strong);
+  border: 1px solid rgba(35, 76, 107, 0.12);
+}
+
+.clockLabel {
+  margin: 0 0 0.9rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.clockValue {
+  margin: 0;
+  font-size: clamp(2.2rem, 8vw, 4.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.clockEmpty {
+  margin: 0;
+  font-size: clamp(1.6rem, 5vw, 2.3rem);
+  font-weight: 700;
+}
+
+.meta {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.meta strong {
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 1.35rem;
+  }
+
+  .clockWrap {
+    padding: 1.2rem;
+  }
+}

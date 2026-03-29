@@ -1,0 +1,59 @@
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+}
+
+.title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.item {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.itemTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.itemLink {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.itemLink:hover,
+.itemLink:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.trusted {
+  color: var(--success);
+  font-weight: 700;
+}
