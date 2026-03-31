@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { normalizeStatusPayload } from "@/lib/normalizers";
 import type { StatusApiResponse } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+const STATUS_REVALIDATE_SECONDS = 3_600;
+
+export const revalidate = STATUS_REVALIDATE_SECONDS;
 
 export async function GET() {
   const statusUrl = process.env.N8N_STATUS_URL;
@@ -26,8 +27,7 @@ export async function GET() {
       headers: {
         Accept: "application/json"
       },
-      cache: "no-store",
-      next: { revalidate: 0 },
+      next: { revalidate: STATUS_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(15000)
     });
 
@@ -53,7 +53,7 @@ export async function GET() {
     return NextResponse.json(body, {
       status: 200,
       headers: {
-        "Cache-Control": "no-store, max-age=0"
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate=60"
       }
     });
   } catch (error) {
