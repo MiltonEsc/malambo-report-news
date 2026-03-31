@@ -8,7 +8,7 @@ import { StatusPanel } from "@/components/StatusPanel";
 import { TimerCard } from "@/components/TimerCard";
 import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
 
-const REFRESH_INTERVAL_MS = 60_000;
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
 interface DashboardState {
   loading: boolean;
@@ -140,7 +140,7 @@ export function HomeDashboard() {
             />
 
             <p className={styles.intro}>
-              Este panel consulta un proxy interno cada 60 segundos para actualizar el estado
+              Este panel consulta un proxy interno cada 1 hora para actualizar el estado
               público.
             </p>
 
@@ -184,3 +184,4 @@ export function HomeDashboard() {
     </main>
   );
 }
+
