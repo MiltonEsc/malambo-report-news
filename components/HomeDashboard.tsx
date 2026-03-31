@@ -8,7 +8,7 @@ import { StatusPanel } from "@/components/StatusPanel";
 import { TimerCard } from "@/components/TimerCard";
 import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
 
-const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 3_600_000;
 
 interface DashboardState {
   loading: boolean;
