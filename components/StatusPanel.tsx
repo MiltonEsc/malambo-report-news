@@ -16,6 +16,8 @@ interface StatusPanelProps {
 
 export function StatusPanel({ status, fetchedAt }: StatusPanelProps) {
   const alertClassName = styles[status.nivelAlerta] ?? styles.desconocida;
+  const latestSourceLabel = status.ultimaFuente ?? "Fuente no disponible";
+  const latestHeadline = status.ultimoTitulo ?? "Sin titular disponible";
 
   return (
     <section className={styles.panel} aria-labelledby="status-panel-title">
@@ -26,38 +28,55 @@ export function StatusPanel({ status, fetchedAt }: StatusPanelProps) {
         <span className={`${styles.badge} ${alertClassName}`}>{ALERT_LABELS[status.nivelAlerta]}</span>
       </div>
 
-      <div className={styles.grid}>
+      <div className={styles.cards}>
         <article className={styles.item}>
-          <p className={styles.label}>Última revisión automática</p>
+          <p className={styles.label}>Ultima revision automatica</p>
           <p className={styles.value}>{formatSpanishDate(status.ultimaRevision)}</p>
         </article>
 
         <article className={styles.item}>
-          <p className={styles.label}>Última sincronización del panel</p>
+          <p className={styles.label}>Ultima sincronizacion del panel</p>
           <p className={styles.value}>{formatSpanishDate(fetchedAt)}</p>
         </article>
+      </div>
 
-        <article className={styles.item}>
-          <p className={styles.label}>Último titular</p>
-          <p className={styles.value}>{status.ultimoTitulo ?? "Sin titular disponible"}</p>
-        </article>
+      <article className={styles.heroCard}>
+        <div className={styles.heroMeta}>
+          <span className={styles.heroLabel}>Titular reciente</span>
+          <span className={styles.heroTag}>{status.estadoActual.replaceAll("_", " ")}</span>
+        </div>
+        <p className={styles.heroHeadline}>{latestHeadline}</p>
+        <div className={styles.heroFooter}>
+          {status.ultimaUrl ? (
+            <a className={styles.heroLink} href={status.ultimaUrl} target="_blank" rel="noreferrer">
+              {latestSourceLabel}
+            </a>
+          ) : (
+            <span className={styles.heroSource}>{latestSourceLabel}</span>
+          )}
+          <span className={styles.heroSource}>
+            {status.coincidenciasRecientes} coincidencias recientes aceptadas
+          </span>
+        </div>
+      </article>
 
+      <div className={styles.grid}>
         <article className={styles.item}>
           <p className={styles.label}>Fuente principal</p>
           <p className={styles.value}>
             {status.ultimaUrl ? (
-              <a
-                className={styles.link}
-                href={status.ultimaUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {status.ultimaFuente ?? "Abrir reporte"}
+              <a className={styles.link} href={status.ultimaUrl} target="_blank" rel="noreferrer">
+                {latestSourceLabel}
               </a>
             ) : (
-              status.ultimaFuente ?? "Sin fuente disponible"
+              latestSourceLabel
             )}
           </p>
+        </article>
+
+        <article className={styles.item}>
+          <p className={styles.label}>Ultimo dia reportado</p>
+          <p className={styles.value}>{status.ultimoDiaEvento ?? "Sin dato disponible"}</p>
         </article>
 
         <article className={styles.item}>

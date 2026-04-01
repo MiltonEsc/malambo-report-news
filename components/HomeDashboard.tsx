@@ -81,12 +81,11 @@ export function HomeDashboard() {
           error:
             error instanceof Error
               ? error.message
-              : "Ocurrió un error inesperado al consultar el estado.",
+              : "Ocurrio un error inesperado al consultar el estado.",
           data: current.data,
           fetchedAt: current.fetchedAt
         }));
       }
-
     };
 
     void loadStatus();
@@ -106,19 +105,24 @@ export function HomeDashboard() {
 
   return (
     <main className={styles.shell}>
+      <header className={styles.topbar}>
+        <span className={styles.brand}>Sentinel Monitor</span>
+        <span className={styles.topbarNote}>Panel publico de seguimiento automatizado</span>
+      </header>
+
       <div className={styles.hero}>
         {state.loading && !state.data ? (
           <section className={styles.notice} aria-live="polite">
             <h1 className={styles.noticeTitle}>Cargando estado actual</h1>
             <p className={styles.noticeText}>
-              Estamos consultando el último evento detectado por la automatización.
+              Estamos consultando el ultimo evento detectado por la automatizacion.
             </p>
           </section>
         ) : null}
 
         {state.error && !state.data ? (
           <section className={styles.notice} aria-live="assertive">
-            <h1 className={styles.noticeTitle}>No fue posible cargar la información</h1>
+            <h1 className={styles.noticeTitle}>No fue posible cargar la informacion</h1>
             <p className={styles.noticeText}>{state.error}</p>
           </section>
         ) : null}
@@ -127,65 +131,75 @@ export function HomeDashboard() {
           <section className={styles.notice}>
             <h1 className={styles.noticeTitle}>Sin datos disponibles</h1>
             <p className={styles.noticeText}>
-              El endpoint interno respondió sin contenido utilizable.
+              El endpoint interno respondio sin contenido utilizable.
             </p>
           </section>
         ) : null}
 
         {state.data ? (
           <>
-            <TimerCard
-              municipality={state.data.municipio}
-              eventDate={state.data.ultimaFechaEventoReal}
-              foundDate={state.data.ultimaFechaHallazgo}
-            />
+            <section className={styles.heroSection}>
+              <TimerCard
+                municipality={state.data.municipio}
+                eventDate={state.data.ultimaFechaEventoReal}
+                foundDate={state.data.ultimaFechaHallazgo}
+              />
+            </section>
 
-            <p className={styles.intro}>
-              Este panel consulta un proxy interno cada 1 hora para actualizar el estado
-              público.
-            </p>
-
-            <section className={styles.grid} aria-label="Detalle del monitoreo">
-              <div className={styles.stack}>
-                <StatusPanel status={state.data} fetchedAt={state.fetchedAt ?? new Date().toISOString()} />
-                {state.data.reporteEstadistico ? (
-                  <StatsPanel report={state.data.reporteEstadistico} />
-                ) : null}
-              </div>
-
-              <div className={styles.stack}>
-                <ReportsList reports={state.data.historial} />
+            <section className={styles.asymmetricGrid} aria-label="Detalle del monitoreo">
+              <div className={styles.sidebar}>
+                <StatusPanel
+                  status={state.data}
+                  fetchedAt={state.fetchedAt ?? new Date().toISOString()}
+                />
 
                 {!hasEventDate ? (
                   <section className={styles.notice}>
-                    <h2 className={styles.noticeTitle}>Sin eventos recientes</h2>
+                    <h2 className={styles.noticeTitle}>Contador en pausa</h2>
                     <p className={styles.noticeText}>
-                      El webhook no reporta una fecha válida en <code>ultima_fecha_evento_real</code>,
-                      por lo que el contador permanece desactivado hasta recibir un nuevo evento.
+                      El webhook no reporta una fecha valida en
+                      <code className={styles.inlineCode}>ultima_fecha_evento_real</code>, por lo
+                      que el contador permanece desactivado hasta recibir un nuevo evento.
                     </p>
                   </section>
                 ) : null}
 
                 {state.error ? (
                   <section className={styles.notice} aria-live="polite">
-                    <h2 className={styles.noticeTitle}>Última actualización con advertencia</h2>
+                    <h2 className={styles.noticeTitle}>Actualizacion con advertencia</h2>
                     <p className={styles.noticeText}>
-                      Se conserva el dato más reciente cargado correctamente, pero el refresco
-                      automático reportó este problema: {state.error}
+                      Se conserva el dato mas reciente cargado correctamente, pero el refresco
+                      automatico reporto este problema: {state.error}
                     </p>
                   </section>
                 ) : null}
               </div>
+
+              <div className={styles.mainColumn}>
+                {state.data.reporteEstadistico ? (
+                  <StatsPanel report={state.data.reporteEstadistico} />
+                ) : (
+                  <section className={styles.notice}>
+                    <h2 className={styles.noticeTitle}>Reporte estadistico no disponible</h2>
+                    <p className={styles.noticeText}>
+                      La automatizacion aun no entrego un resumen agregado para este corte.
+                    </p>
+                  </section>
+                )}
+              </div>
+            </section>
+
+            <section className={styles.bottomSection}>
+              <ReportsList reports={state.data.historial} />
             </section>
           </>
         ) : null}
 
         <footer className={styles.footer}>
-          Panel público informativo. Verifica siempre las fuentes originales enlazadas para mayor
-          contexto.
+          Panel publico informativo. Verifica siempre las fuentes originales enlazadas para mayor
+          contexto. Actualizacion automatica cada 1 hora.
         </footer>
       </div>
     </main>
   );
 }
-

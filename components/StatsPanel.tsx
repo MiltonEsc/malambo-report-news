@@ -7,6 +7,8 @@ interface StatsPanelProps {
 }
 
 export function StatsPanel({ report }: StatsPanelProps) {
+  const maxCrimeTotal = Math.max(...report.tiposDelito.map((item) => item.total), 1);
+
   return (
     <section className={styles.panel} aria-labelledby="stats-panel-title">
       <div className={styles.header}>
@@ -38,15 +40,23 @@ export function StatsPanel({ report }: StatsPanelProps) {
 
       <div className={styles.columns}>
         <div className={styles.block}>
-          <h3 className={styles.blockTitle}>Tipos de delito</h3>
+          <h3 className={styles.blockTitle}>Desglose por delito</h3>
           {report.tiposDelito.length === 0 ? (
             <p className={styles.empty}>Sin desglose disponible.</p>
           ) : (
-            <ul className={styles.list}>
+            <ul className={styles.bars}>
               {report.tiposDelito.map((item) => (
-                <li key={item.label} className={styles.listItem}>
-                  <span>{item.label}</span>
-                  <strong>{item.total}</strong>
+                <li key={item.label} className={styles.barItem}>
+                  <div className={styles.barHeader}>
+                    <span>{item.label}</span>
+                    <strong>{item.total}</strong>
+                  </div>
+                  <div className={styles.barTrack}>
+                    <div
+                      className={styles.barFill}
+                      style={{ width: `${Math.max((item.total / maxCrimeTotal) * 100, 6)}%` }}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

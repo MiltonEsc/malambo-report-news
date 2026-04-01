@@ -1,70 +1,130 @@
 .shell {
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1280px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 2rem 0 3rem;
+  padding: 1.5rem 0 3.5rem;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-xl);
+  background: rgba(248, 249, 250, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+.brand {
+  font-family: var(--font-headline), "Segoe UI", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.topbarNote {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .hero {
-  padding-top: 2rem;
+  padding-top: 3rem;
 }
 
-.intro {
-  margin: 1rem 0 0;
-  color: var(--muted);
-  line-height: 1.7;
-  max-width: 70ch;
+.heroSection {
+  padding: 0 0 3rem;
 }
 
-.grid {
-  margin-top: 1.5rem;
+.asymmetricGrid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.35fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.sidebar,
+.mainColumn,
+.bottomSection {
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
 }
 
-.stack {
-  display: grid;
-  gap: 1.25rem;
+.bottomSection {
+  margin-top: 2rem;
 }
 
 .notice {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  padding: 1.35rem;
   border-radius: var(--radius-lg);
-  padding: 1.4rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
   box-shadow: var(--shadow);
 }
 
 .noticeTitle {
-  margin: 0 0 0.55rem;
-  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
 }
 
 .noticeText {
   margin: 0;
   color: var(--muted);
-  line-height: 1.65;
+  line-height: 1.75;
+}
+
+.inlineCode {
+  margin: 0 0.2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.4rem;
+  background: var(--surface);
+  color: var(--muted-strong);
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.9em;
 }
 
 .footer {
   margin-top: 1rem;
   color: var(--muted);
-  font-size: 0.93rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
 }
 
 @media (max-width: 920px) {
-  .grid {
+  .asymmetricGrid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
   .shell {
-    width: min(100% - 1rem, 1120px);
+    width: min(100% - 1rem, 1280px);
     padding-bottom: 2rem;
   }
 
+  .topbar {
+    position: static;
+    padding: 1rem;
+  }
+
+  .topbar,
+  .topbarNote {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .hero {
-    padding-top: 1rem;
+    padding-top: 1.5rem;
+  }
+
+  .heroSection {
+    padding-bottom: 2rem;
   }
 }
