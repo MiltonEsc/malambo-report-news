@@ -1,0 +1,230 @@
+{
+  "name": "Malambo 360: Analítica Global e Índice de Inseguridad",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "id": "n1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=Malambo+Atlantico&hl=es-419&gl=CO&ceid=CO:es-419",
+        "options": {}
+      },
+      "id": "n2",
+      "name": "RSS Global Malambo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "content": "Eres un analista de datos urbanos. Tu tarea es clasificar noticias de Malambo, Atlántico.\n\nDevuelve SIEMPRE un JSON con:\n1. category: (Seguridad, Política, Deportes, Comunidad, Infraestructura, Otros).\n2. sub_category: (Homicidio, Hurto, Captura, Gestión Pública, Evento Social, etc).\n3. sentiment: (Positivo, Negativo, Neutro).\n4. barrio: Nombre del barrio o 'Desconocido'.\n5. id_evento: Un ID único basado en [Fecha]-[Barrio]-[Sujeto] para evitar duplicados.\n6. resumen: Una frase corta de lo ocurrido."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.title }} - {{ $json.description }}"
+            }
+          ]
+        },
+        "jsonOutput": true
+      },
+      "id": "n3",
+      "name": "IA Clasificador 360",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        450,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "TU_ID_DE_GOOGLE_SHEETS",
+          "mode": "id"
+        },
+        "sheetName": "Hoja 1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID_Evento": "={{ $json.id_evento }}",
+            "Fecha": "={{ $node[\"RSS Global Malambo\"].json.pubDate }}",
+            "Titulo": "={{ $node[\"RSS Global Malambo\"].json.title }}",
+            "Categoria": "={{ $json.category }}",
+            "SubCategoria": "={{ $json.sub_category }}",
+            "Sentimiento": "={{ $json.sentiment }}",
+            "Barrio": "={{ $json.barrio }}",
+            "Resumen": "={{ $json.resumen }}",
+            "URL": "={{ $node[\"RSS Global Malambo\"].json.link }}"
+          },
+          "matchingColumns": [
+            "ID_Evento"
+          ]
+        }
+      },
+      "id": "n4",
+      "name": "Guardar en Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "analitica-malambo",
+        "options": {}
+      },
+      "id": "n5",
+      "name": "Webhook Web Pública",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": {
+          "__rl": true,
+          "value": "TU_ID_DE_GOOGLE_SHEETS",
+          "mode": "id"
+        },
+        "sheetName": "Hoja 1"
+      },
+      "id": "n6",
+      "name": "Leer Base de Datos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const news = $input.all();\nconst total = news.length;\n\n// Filtrar noticias de seguridad con impacto negativo\nconst inseguridad = news.filter(n => \n  n.json.Categoria === 'Seguridad' && \n  (n.json.Sentimiento === 'Negativo' || n.json.SubCategoria === 'Homicidio')\n);\n\n// Agrupar por barrios para ranking\nconst barriosMap = news.reduce((acc, cur) => {\n  if (cur.json.Barrio !== 'Desconocido') {\n    acc[cur.json.Barrio] = (acc[cur.json.Barrio] || 0) + 1;\n  }\n  return acc;\n}, {});\n\nconst rankingBarrios = Object.keys(barriosMap)\n  .map(b => ({ nombre: b, noticias: barriosMap[b] }))\n  .sort((a, b) => b.noticias - a.noticias);\n\n// Calcular el Índice de Inseguridad (Ratio de noticias negativas vs total)\nconst indice = ((inseguridad.length / total) * 100).toFixed(1);\n\nreturn {\n  municipio: \"Malambo\",\n  periodo: \"Últimos registros\",\n  total_noticias_monitoreadas: total,\n  indice_inseguridad: indice + \"%\",\n  estado_alerta: indice > 40 ? \"CRÍTICA\" : (indice > 20 ? \"MODERADA\" : \"BAJA\"),\n  ranking_sectores_activos: rankingBarrios.slice(0, 5),\n  desglose_inseguridad: {\n    total_hechos_negativos: inseguridad.length,\n    ultimos_sucesos: inseguridad.slice(-3).map(i => i.json.Resumen)\n  }\n};"
+      },
+      "id": "n7",
+      "name": "Cálculo de Índices",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "n8",
+      "name": "Enviar a la Web",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Global Malambo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Global Malambo": {
+      "main": [
+        [
+          {
+            "node": "IA Clasificador 360",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Clasificador 360": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Web Pública": {
+      "main": [
+        [
+          {
+            "node": "Leer Base de Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Base de Datos": {
+      "main": [
+        [
+          {
+            "node": "Cálculo de Índices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cálculo de Índices": {
+      "main": [
+        [
+          {
+            "node": "Enviar a la Web",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

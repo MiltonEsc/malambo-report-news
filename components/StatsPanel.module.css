@@ -1,0 +1,160 @@
+.panel {
+  background: linear-gradient(180deg, rgba(255, 248, 237, 0.96), rgba(255, 255, 255, 0.92));
+  border: 1px solid rgba(142, 107, 22, 0.16);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  display: grid;
+  gap: 1.1rem;
+  box-shadow: var(--shadow);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(138, 61, 52, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(138, 61, 52, 0.2);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.metric,
+.block,
+.alertItem {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.metric {
+  padding: 0.95rem;
+}
+
+.label {
+  margin: 0 0 0.45rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.value {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.block {
+  padding: 1rem;
+}
+
+.blockTitle {
+  margin: 0 0 0.85rem;
+  font-size: 0.98rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.listItem:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.alerts {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.alertItem {
+  padding: 0.95rem;
+}
+
+.alertZone {
+  margin: 0 0 0.45rem;
+  color: var(--warning);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.alertLink,
+.alertText {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.alertLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.alertLink:hover,
+.alertLink:focus-visible {
+  text-decoration: underline;
+}
+
+@media (max-width: 920px) {
+  .metrics,
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+  }
+}

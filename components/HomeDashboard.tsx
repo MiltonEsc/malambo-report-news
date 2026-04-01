@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import styles from "@/components/HomeDashboard.module.css";
 import { ReportsList } from "@/components/ReportsList";
+import { StatsPanel } from "@/components/StatsPanel";
 import { StatusPanel } from "@/components/StatusPanel";
 import { TimerCard } from "@/components/TimerCard";
 import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
@@ -147,6 +148,9 @@ export function HomeDashboard() {
             <section className={styles.grid} aria-label="Detalle del monitoreo">
               <div className={styles.stack}>
                 <StatusPanel status={state.data} fetchedAt={state.fetchedAt ?? new Date().toISOString()} />
+                {state.data.reporteEstadistico ? (
+                  <StatsPanel report={state.data.reporteEstadistico} />
+                ) : null}
               </div>
 
               <div className={styles.stack}>

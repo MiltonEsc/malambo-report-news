@@ -15,6 +15,24 @@ export interface ReportItem {
   trusted: boolean;
 }
 
+export interface StatsAlertItem {
+  title: string;
+  link: string | null;
+  barrio: string | null;
+}
+
+export interface SecurityStatsReport {
+  municipio: string;
+  fechaReporte: string | null;
+  totalNoticias: number;
+  indiceInseguridad: string | null;
+  nivelAlerta: string | null;
+  tiposDelito: Array<{ label: string; total: number }>;
+  rankingZonas: Array<{ label: string; total: number }>;
+  alertasRecientes: StatsAlertItem[];
+  fuente: string | null;
+}
+
 export interface StatusResponse {
   municipio: string;
   estadoActual: CurrentState;
@@ -28,6 +46,7 @@ export interface StatusResponse {
   ultimaRevision: string | null;
   coincidenciasRecientes: number;
   historial: ReportItem[];
+  reporteEstadistico: SecurityStatsReport | null;
 }
 
 export interface StatusApiSuccess {

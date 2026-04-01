@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { normalizeStatusPayload } from "@/lib/normalizers";
+import { normalizeStatsPayload, normalizeStatusPayload } from "@/lib/normalizers";
 import type { StatusApiResponse } from "@/lib/types";
 
 const STATUS_REVALIDATE_SECONDS = 3_600;
@@ -9,6 +9,7 @@ export const revalidate = STATUS_REVALIDATE_SECONDS;
 
 export async function GET() {
   const statusUrl = process.env.N8N_STATUS_URL;
+  const statsUrl = process.env.N8N_STATS_URL;
   const fetchedAt = new Date().toISOString();
 
   if (!statusUrl) {
@@ -43,6 +44,21 @@ export async function GET() {
 
     const rawPayload: unknown = await response.json();
     const data = normalizeStatusPayload(rawPayload);
+    const statsResponse = statsUrl
+      ? await fetch(statsUrl, {
+          method: "GET",
+          headers: {
+            Accept: "application/json"
+          },
+          next: { revalidate: STATUS_REVALIDATE_SECONDS },
+          signal: AbortSignal.timeout(15000)
+        })
+      : null;
+
+    if (statsResponse?.ok) {
+      const rawStatsPayload: unknown = await statsResponse.json();
+      data.reporteEstadistico = normalizeStatsPayload(rawStatsPayload);
+    }
 
     const body: StatusApiResponse = {
       ok: true,
