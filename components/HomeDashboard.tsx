@@ -6,6 +6,7 @@ import styles from "@/components/HomeDashboard.module.css";
 import { ReportsList } from "@/components/ReportsList";
 import { StatsPanel } from "@/components/StatsPanel";
 import { StatusPanel } from "@/components/StatusPanel";
+import { StreakHistoryTable } from "@/components/StreakHistoryTable";
 import { TimerCard } from "@/components/TimerCard";
 import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
 
@@ -143,6 +144,7 @@ export function HomeDashboard() {
                 municipality={state.data.municipio}
                 eventDate={state.data.ultimaFechaEventoReal}
                 foundDate={state.data.ultimaFechaHallazgo}
+                streakHistory={state.data.historialRachas}
               />
             </section>
 
@@ -190,6 +192,7 @@ export function HomeDashboard() {
             </section>
 
             <section className={styles.bottomSection}>
+              <StreakHistoryTable streaks={state.data.historialRachas} />
               <ReportsList reports={state.data.historial} />
             </section>
           </>

@@ -33,6 +33,17 @@ export interface SecurityStatsReport {
   fuente: string | null;
 }
 
+export interface StreakHistoryItem {
+  rowNumber: number | null;
+  municipio: string;
+  startDate: string | null;
+  endDate: string | null;
+  durationLabel: string | null;
+  durationMs: number | null;
+  eventTitle: string | null;
+  url: string | null;
+}
+
 export interface StatusResponse {
   municipio: string;
   estadoActual: CurrentState;
@@ -46,6 +57,7 @@ export interface StatusResponse {
   ultimaRevision: string | null;
   coincidenciasRecientes: number;
   historial: ReportItem[];
+  historialRachas: StreakHistoryItem[];
   reporteEstadistico: SecurityStatsReport | null;
 }
 

@@ -4,7 +4,8 @@ import type {
   ReportItem,
   SecurityStatsReport,
   StatsAlertItem,
-  StatusResponse
+  StatusResponse,
+  StreakHistoryItem
 } from "@/lib/types";
 import { isValidUrl, parseDateSafely } from "@/lib/time";
 
@@ -18,6 +19,16 @@ function asNumber(value: unknown): number {
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+function pickFirst(record: Record<string, unknown>, keys: string[]): unknown {
+  for (const key of keys) {
+    if (key in record) {
+      return record[key];
+    }
+  }
+
+  return undefined;
 }
 
 function normalizeAlertLevel(value: unknown): AlertLevel {
@@ -66,6 +77,63 @@ function normalizeReportItem(value: unknown): ReportItem | null {
     pubDate: normalizeIsoDate(record.pubDate),
     tipoEvento: asString(record.tipo_evento),
     trusted: record.trusted === true
+  };
+}
+
+function parseDurationToMs(value: string | null): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.toLowerCase();
+  const days = /(\d+)\s*d/.exec(normalized);
+  const hours = /(\d+)\s*h/.exec(normalized);
+  const minutes = /(\d+)\s*m/.exec(normalized);
+  const seconds = /(\d+)\s*s/.exec(normalized);
+
+  const totalMs =
+    (days ? Number(days[1]) : 0) * 24 * 60 * 60 * 1000 +
+    (hours ? Number(hours[1]) : 0) * 60 * 60 * 1000 +
+    (minutes ? Number(minutes[1]) : 0) * 60 * 1000 +
+    (seconds ? Number(seconds[1]) : 0) * 1000;
+
+  return totalMs > 0 ? totalMs : null;
+}
+
+function normalizeStreakHistoryItem(value: unknown): StreakHistoryItem | null {
+  const record = asRecord(value);
+  const rowNumberValue = pickFirst(record, ["row_number", "Row Number"]);
+  const durationLabel = asString(pickFirst(record, ["Duracion", "Duración", "DuraciÃ³n"]));
+  const startDate = normalizeIsoDate(
+    pickFirst(record, ["Fecha Inicio Racha", "fecha_inicio_racha", "start_date"])
+  );
+  const endDate = normalizeIsoDate(
+    pickFirst(record, ["Fecha Fin Racha", "fecha_fin_racha", "end_date"])
+  );
+  const eventTitle = asString(
+    pickFirst(record, [
+      "Titulo del Evento",
+      "Título del Evento",
+      "TÃ­tulo del Evento",
+      "event_title"
+    ])
+  );
+  const urlValue = asString(pickFirst(record, ["URL", "url"]));
+
+  if (!startDate && !endDate && !durationLabel && !eventTitle && !urlValue) {
+    return null;
+  }
+
+  return {
+    rowNumber:
+      typeof rowNumberValue === "number" && Number.isFinite(rowNumberValue) ? rowNumberValue : null,
+    municipio: asString(pickFirst(record, ["Municipio", "municipio"])) ?? "Malambo",
+    startDate,
+    endDate,
+    durationLabel,
+    durationMs: parseDurationToMs(durationLabel),
+    eventTitle,
+    url: isValidUrl(urlValue) ? urlValue : null
   };
 }
 
@@ -127,9 +195,13 @@ export function normalizeStatsPayload(payload: unknown): SecurityStatsReport | n
 export function normalizeStatusPayload(payload: unknown): StatusResponse {
   const record = asRecord(payload);
   const historialRaw = Array.isArray(record.historial) ? record.historial : [];
+  const historialRachasRaw = Array.isArray(record.historial_rachas) ? record.historial_rachas : [];
   const historial = historialRaw
     .map((item) => normalizeReportItem(item))
     .filter((item): item is ReportItem => item !== null);
+  const historialRachas = historialRachasRaw
+    .map((item) => normalizeStreakHistoryItem(item))
+    .filter((item): item is StreakHistoryItem => item !== null);
 
   const ultimaUrlValue = asString(record.ultima_url);
 
@@ -146,6 +218,7 @@ export function normalizeStatusPayload(payload: unknown): StatusResponse {
     ultimaRevision: normalizeIsoDate(record.ultima_revision),
     coincidenciasRecientes: asNumber(record.coincidencias_recientes),
     historial,
+    historialRachas,
     reporteEstadistico: null
   };
 }

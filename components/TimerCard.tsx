@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import styles from "@/components/TimerCard.module.css";
+import type { StreakHistoryItem } from "@/lib/types";
 import {
   clampElapsedMs,
   formatDurationParts,
@@ -14,9 +15,15 @@ interface TimerCardProps {
   municipality: string;
   eventDate: string | null;
   foundDate: string | null;
+  streakHistory: StreakHistoryItem[];
 }
 
-export function TimerCard({ municipality, eventDate, foundDate }: TimerCardProps) {
+export function TimerCard({
+  municipality,
+  eventDate,
+  foundDate,
+  streakHistory
+}: TimerCardProps) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -30,6 +37,16 @@ export function TimerCard({ municipality, eventDate, foundDate }: TimerCardProps
   const parsedDate = useMemo(() => parseDateSafely(eventDate), [eventDate]);
   const elapsed = clampElapsedMs(parsedDate, now);
   const duration = formatDurationParts(elapsed);
+  const historicalLongestStreakMs = useMemo(() => {
+    const values = streakHistory
+      .map((item) => item.durationMs)
+      .filter((value): value is number => value !== null);
+
+    return values.length > 0 ? Math.max(...values) : null;
+  }, [streakHistory]);
+  const longestObservedMs =
+    elapsed === null ? historicalLongestStreakMs : Math.max(historicalLongestStreakMs ?? 0, elapsed);
+  const longestObservedDuration = formatDurationParts(longestObservedMs);
 
   return (
     <section className={styles.card} aria-labelledby="main-counter-title">
@@ -80,6 +97,18 @@ export function TimerCard({ municipality, eventDate, foundDate }: TimerCardProps
         <article className={styles.metaCard}>
           <span className={styles.metaLabel}>Ultimo hallazgo automatico</span>
           <strong className={styles.metaValue}>{formatSpanishDate(foundDate)}</strong>
+        </article>
+        <article className={styles.metaCard}>
+          <span className={styles.metaLabel}>Racha mas larga observada</span>
+          <strong className={styles.metaValue}>
+            {longestObservedDuration
+              ? `${longestObservedDuration.days}d ${String(longestObservedDuration.hours).padStart(2, "0")}h ${String(longestObservedDuration.minutes).padStart(2, "0")}m`
+              : "Aun sin reinicios registrados"}
+          </strong>
+        </article>
+        <article className={styles.metaCard}>
+          <span className={styles.metaLabel}>Reinicios registrados</span>
+          <strong className={styles.metaValue}>{streakHistory.length} desde el webhook</strong>
         </article>
       </div>
     </section>
