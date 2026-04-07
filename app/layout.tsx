@@ -17,7 +17,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Malambo sin homicidios o intentos recientes",
   description:
-    "Contador publico con el tiempo transcurrido desde el ultimo homicidio, atentado o intento de homicidio detectado en Malambo, Atlantico.",
+    "Contador publico con el tiempo transcurrido desde el ultimo homicidio, atentado o intento de homicidio detectado en Malambo.",
   applicationName: "Malambo Status",
   keywords: [
     "Malambo",
