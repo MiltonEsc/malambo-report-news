@@ -24,9 +24,10 @@ export function TimerCard({
   foundDate,
   streakHistory
 }: TimerCardProps) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const intervalId = window.setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -35,7 +36,7 @@ export function TimerCard({
   }, []);
 
   const parsedDate = useMemo(() => parseDateSafely(eventDate), [eventDate]);
-  const elapsed = clampElapsedMs(parsedDate, now);
+  const elapsed = now !== null ? clampElapsedMs(parsedDate, now) : null;
   const duration = formatDurationParts(elapsed);
   const historicalLongestStreakMs = useMemo(() => {
     const values = streakHistory
@@ -60,7 +61,11 @@ export function TimerCard({
       </div>
 
       <div className={styles.clockWrap} aria-live="polite" aria-atomic="true">
-        {duration ? (
+        {now === null ? (
+          <div className={styles.metricGrid} style={{ opacity: 0 }}>
+             <div className={styles.metric}><span className={styles.metricValue}>0</span></div>
+          </div>
+        ) : duration ? (
           <div className={styles.metricGrid}>
             <div className={styles.metric}>
               <span className={styles.metricValue}>{duration.days}</span>

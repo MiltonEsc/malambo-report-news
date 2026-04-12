@@ -12,12 +12,22 @@ const ALERT_LABELS: Record<AlertLevel, string> = {
 interface StatusPanelProps {
   status: StatusResponse;
   fetchedAt: string;
+  effectiveHeadline?: string | null;
+  effectiveUrl?: string | null;
+  effectiveSource?: string | null;
 }
 
-export function StatusPanel({ status, fetchedAt }: StatusPanelProps) {
+export function StatusPanel({
+  status,
+  fetchedAt,
+  effectiveHeadline,
+  effectiveUrl,
+  effectiveSource
+}: StatusPanelProps) {
   const alertClassName = styles[status.nivelAlerta] ?? styles.desconocida;
-  const latestSourceLabel = status.ultimaFuente ?? "Fuente no disponible";
-  const latestHeadline = status.ultimoTitulo ?? "Sin titular disponible";
+  const latestSourceLabel = effectiveSource ?? status.ultimaFuente ?? "Fuente no disponible";
+  const latestHeadline = effectiveHeadline ?? status.ultimoTitulo ?? "Sin titular disponible";
+  const latestUrl = effectiveUrl ?? status.ultimaUrl;
 
   return (
     <section className={styles.panel} aria-labelledby="status-panel-title">
@@ -47,8 +57,8 @@ export function StatusPanel({ status, fetchedAt }: StatusPanelProps) {
         </div>
         <p className={styles.heroHeadline}>{latestHeadline}</p>
         <div className={styles.heroFooter}>
-          {status.ultimaUrl ? (
-            <a className={styles.heroLink} href={status.ultimaUrl} target="_blank" rel="noreferrer">
+          {latestUrl ? (
+            <a className={styles.heroLink} href={latestUrl} target="_blank" rel="noreferrer">
               {latestSourceLabel}
             </a>
           ) : (
@@ -64,8 +74,8 @@ export function StatusPanel({ status, fetchedAt }: StatusPanelProps) {
         <article className={styles.item}>
           <p className={styles.label}>Fuente principal</p>
           <p className={styles.value}>
-            {status.ultimaUrl ? (
-              <a className={styles.link} href={status.ultimaUrl} target="_blank" rel="noreferrer">
+            {latestUrl ? (
+              <a className={styles.link} href={latestUrl} target="_blank" rel="noreferrer">
                 {latestSourceLabel}
               </a>
             ) : (

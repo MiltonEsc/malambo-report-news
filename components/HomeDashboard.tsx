@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import styles from "@/components/HomeDashboard.module.css";
 import { ReportsList } from "@/components/ReportsList";
@@ -8,9 +8,15 @@ import { StatsPanel } from "@/components/StatsPanel";
 import { StatusPanel } from "@/components/StatusPanel";
 import { StreakHistoryTable } from "@/components/StreakHistoryTable";
 import { TimerCard } from "@/components/TimerCard";
-import type { StatusApiResponse, StatusApiSuccess, StatusResponse } from "@/lib/types";
+import { parseDateSafely } from "@/lib/time";
+import type {
+  StatusApiResponse,
+  StatusApiSuccess,
+  StatusResponse,
+  StreakHistoryItem
+} from "@/lib/types";
 
-const REFRESH_INTERVAL_MS = 3_600_000;
+const REFRESH_INTERVAL_MS = 60_000;
 
 interface DashboardState {
   loading: boolean;
@@ -102,7 +108,99 @@ export function HomeDashboard() {
     };
   }, []);
 
-  const hasEventDate = Boolean(state.data?.ultimaFechaEventoReal);
+  const effectiveEventDate = useMemo(() => {
+    if (!state.data) {
+      return null;
+    }
+
+    const now = Date.now();
+    const baseEventDate = state.data.ultimaFechaEventoReal;
+    const latestStreakEndDate = state.data.historialRachas.reduce<string | null>((latest, streak) => {
+      if (!streak.endDate) {
+        return latest;
+      }
+
+      const candidateTime = parseDateSafely(streak.endDate)?.getTime();
+
+      if (!candidateTime || candidateTime > now) {
+        return latest;
+      }
+
+      if (!latest) {
+        return streak.endDate;
+      }
+
+      const latestTime = parseDateSafely(latest)?.getTime() ?? 0;
+
+      return candidateTime > latestTime ? streak.endDate : latest;
+    }, null);
+
+    if (!baseEventDate) {
+      return latestStreakEndDate;
+    }
+
+    const baseTime = parseDateSafely(baseEventDate)?.getTime();
+
+    if (!baseTime || baseTime > now) {
+      return latestStreakEndDate;
+    }
+
+    if (!latestStreakEndDate) {
+      return baseEventDate;
+    }
+
+    const streakTime = parseDateSafely(latestStreakEndDate)?.getTime() ?? 0;
+
+    return streakTime > baseTime ? latestStreakEndDate : baseEventDate;
+  }, [state.data]);
+
+  const effectiveLatestEvent = useMemo(() => {
+    if (!state.data) {
+      return null;
+    }
+
+    const now = Date.now();
+
+    return state.data.historialRachas.reduce<StreakHistoryItem | null>(
+      (latest, streak) => {
+        if (!streak.endDate || !streak.eventTitle) {
+          return latest;
+        }
+
+        const candidateTime = parseDateSafely(streak.endDate)?.getTime();
+
+        if (!candidateTime || candidateTime > now) {
+          return latest;
+        }
+
+        if (!latest) {
+          return streak;
+        }
+
+        const latestTime = parseDateSafely(latest.endDate)?.getTime() ?? 0;
+
+        return candidateTime > latestTime ? streak : latest;
+      },
+      null
+    );
+  }, [state.data]);
+
+  const effectiveHeadline = effectiveLatestEvent?.eventTitle ?? state.data?.ultimoTitulo ?? null;
+  const effectiveUrl = effectiveLatestEvent?.url ?? state.data?.ultimaUrl ?? null;
+  const effectiveSource = useMemo(() => {
+    if (effectiveLatestEvent?.eventTitle) {
+      const parts = effectiveLatestEvent.eventTitle.split(" - ").map((part) => part.trim());
+      const lastPart = parts.at(-1);
+
+      if (lastPart) {
+        return lastPart;
+      }
+    }
+
+    return state.data?.ultimaFuente ?? null;
+  }, [effectiveLatestEvent, state.data?.ultimaFuente]);
+
+  const hasEventDate = Boolean(effectiveEventDate);
 
   return (
     <main className={styles.shell}>
@@ -142,7 +240,7 @@ export function HomeDashboard() {
             <section className={styles.heroSection}>
               <TimerCard
                 municipality={state.data.municipio}
-                eventDate={state.data.ultimaFechaEventoReal}
+                eventDate={effectiveEventDate}
                 foundDate={state.data.ultimaFechaHallazgo}
                 streakHistory={state.data.historialRachas}
               />
@@ -153,6 +251,9 @@ export function HomeDashboard() {
                 <StatusPanel
                   status={state.data}
                   fetchedAt={state.fetchedAt ?? new Date().toISOString()}
+                  effectiveHeadline={effectiveHeadline}
+                  effectiveUrl={effectiveUrl}
+                  effectiveSource={effectiveSource}
                 />
 
                 {!hasEventDate ? (
@@ -200,7 +301,7 @@ export function HomeDashboard() {
 
         <footer className={styles.footer}>
           Panel publico informativo. Verifica siempre las fuentes originales enlazadas para mayor
-          contexto. Actualizacion automatica cada 1 hora.
+          contexto. Actualizacion automatica cada 1 minuto.
         </footer>
       </div>
     </main>
