@@ -1,0 +1,16 @@
+{
+  "municipio": "Malambo",
+  "estadoActual": "sin_reportes_recientes",
+  "nivelAlerta": "baja",
+  "ultimaFechaEventoReal": null,
+  "ultimoDiaEvento": null,
+  "ultimaFechaHallazgo": null,
+  "ultimaFuente": null,
+  "ultimoTitulo": null,
+  "ultimaUrl": null,
+  "ultimaRevision": "2026-04-21T10:00:09.532Z",
+  "coincidenciasRecientes": 0,
+  "historial": [],
+  "historialRachas": [],
+  "reporteEstadistico": null
+}

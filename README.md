@@ -4,7 +4,8 @@ Aplicacion publica construida con Next.js 14, App Router y TypeScript para mostr
 
 ## Caracteristicas
 
-- Proxy interno en `/api/status` para ocultar el webhook de n8n al cliente.
+- Proxy interno en `/api/status` para exponer el estado local del panel al cliente.
+- Webhook interno en `/api/update-racha` para que n8n reinicie la racha por `POST` o `GET`.
 - Contador en vivo que se actualiza cada segundo usando `ultima_fecha_evento_real`.
 - Refresco automatico del estado cada 60 segundos sin recargar la pagina.
 - Normalizacion defensiva de datos incompletos o nulos.
@@ -56,11 +57,15 @@ En Windows PowerShell tambien puedes hacerlo asi:
 Copy-Item .env.example .env.local
 ```
 
-3. Edita `.env.local` y define la URL del webhook de n8n:
+3. Edita `.env.local` y define solo las URLs que todavia quieras consumir desde el servidor:
 
 ```env
 N8N_STATUS_URL=https://tu-instancia-n8n.com/webhook/estado-malambo
+N8N_STATS_URL=https://tu-instancia-n8n.com/webhook/stats-malambo
+MALAMBO_STATE_FILE=C:/ruta/opcional/malambo-status-store.json
 ```
+
+`N8N_STATUS_URL` ahora es opcional y solo se usa para bootstrap inicial si aun no existe un estado local guardado.
 
 4. Inicia el servidor de desarrollo:
 
@@ -72,14 +77,55 @@ npm run dev
 
 ## Como conectar la URL de n8n
 
-La app nunca consulta n8n directamente desde el navegador. El flujo es:
+La app nunca consulta n8n directamente desde el navegador. El flujo principal ahora es:
 
-1. El cliente llama a `/api/status`.
-2. La ruta API lee `N8N_STATUS_URL` desde variables de entorno.
-3. El servidor Next.js hace `fetch` al webhook de n8n.
-4. La respuesta se normaliza y se devuelve al cliente como JSON estable.
+1. n8n detecta un nuevo homicidio.
+2. n8n llama a `/api/update-racha`.
+3. La ruta API guarda `fecha_noticia` como nuevo inicio de la racha y reinicia el contador.
+4. El cliente llama a `/api/status`.
+5. La ruta API lee el estado local guardado y lo devuelve como JSON estable.
 
-Eso permite cambiar la URL real del webhook sin tocar el frontend y evita exponerla publicamente en el navegador.
+Si `N8N_STATS_URL` esta configurada, `/api/status` sigue consultando ese resumen agregado para el panel estadistico.
+
+## Webhook para reiniciar la racha
+
+La ruta nueva acepta `GET` o `POST`:
+
+```text
+/api/update-racha
+```
+
+Parametros soportados:
+
+```text
+reset=true
+dias_paz=12d 04h 11m 00s
+titulo_noticia=Titular del homicidio detectado
+fecha_noticia=2026-04-21T14:30:00-05:00
+url_noticia=https://sitio.com/noticia
+fuente=impactonews.co
+```
+
+- `reset` es obligatorio y debe llegar en `true`.
+- `dias_paz` y `titulo_noticia` son aceptados como pediste.
+- `fecha_noticia` tambien deberia enviarse. Si no llega, la API usara la hora actual del servidor.
+
+Ejemplo `POST` con JSON:
+
+```json
+{
+  "reset": true,
+  "dias_paz": "12d 04h 11m 00s",
+  "titulo_noticia": "Nuevo homicidio reportado en Malambo",
+  "fecha_noticia": "2026-04-21T14:30:00-05:00"
+}
+```
+
+Ejemplo `GET`:
+
+```text
+https://tu-dominio.com/api/update-racha?reset=true&dias_paz=12d%2004h%2011m%2000s&titulo_noticia=Nuevo%20homicidio%20reportado%20en%20Malambo&fecha_noticia=2026-04-21T14:30:00-05:00
+```
 
 ## Formato esperado del webhook
 
@@ -149,6 +195,8 @@ Cambiar el dominio no requiere modificar codigo. Solo debes asegurarte de que el
 ## Notas de produccion
 
 - La ruta `/api/status` usa `cache: "no-store"` para evitar respuestas obsoletas.
+- La ruta `/api/update-racha` escribe el estado en un archivo JSON local.
+- En Vercel, ese archivo no es persistente entre despliegues o cold starts. Si necesitas persistencia real en produccion, conviene mover este estado a una base de datos o KV.
 - El contador se recalcula cada segundo en el cliente.
 - Si `ultima_fecha_evento_real` no existe o no es una fecha valida, la interfaz muestra `Sin eventos recientes`.
 - Si el refresco automatico falla, la UI conserva el ultimo dato valido y muestra una advertencia no intrusiva.
