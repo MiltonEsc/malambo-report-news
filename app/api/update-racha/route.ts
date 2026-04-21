@@ -21,6 +21,18 @@ function asBoolean(value: unknown) {
   return false;
 }
 
+function pickFirstString(...values: unknown[]) {
+  for (const value of values) {
+    const normalized = asString(value);
+
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
 async function parsePayload(request: NextRequest) {
   if (request.method === "GET") {
     const { searchParams } = new URL(request.url);
@@ -28,7 +40,11 @@ async function parsePayload(request: NextRequest) {
     return {
       reset: asBoolean(searchParams.get("reset")),
       diasPaz: asString(searchParams.get("dias_paz")),
-      tituloNoticia: asString(searchParams.get("titulo_noticia")),
+      tituloNoticia: pickFirstString(
+        searchParams.get("titulo_noticia"),
+        searchParams.get("noticia"),
+        searchParams.get("titulo")
+      ),
       fechaNoticia: asString(searchParams.get("fecha_noticia")),
       noticiaUrl: asString(searchParams.get("url_noticia")),
       fuente: asString(searchParams.get("fuente"))
@@ -43,7 +59,7 @@ async function parsePayload(request: NextRequest) {
     return {
       reset: asBoolean(body.reset),
       diasPaz: asString(body.dias_paz),
-      tituloNoticia: asString(body.titulo_noticia),
+      tituloNoticia: pickFirstString(body.titulo_noticia, body.noticia, body.titulo),
       fechaNoticia: asString(body.fecha_noticia),
       noticiaUrl: asString(body.url_noticia),
       fuente: asString(body.fuente)
@@ -59,7 +75,11 @@ async function parsePayload(request: NextRequest) {
     return {
       reset: asBoolean(formData.get("reset")),
       diasPaz: asString(formData.get("dias_paz")),
-      tituloNoticia: asString(formData.get("titulo_noticia")),
+      tituloNoticia: pickFirstString(
+        formData.get("titulo_noticia"),
+        formData.get("noticia"),
+        formData.get("titulo")
+      ),
       fechaNoticia: asString(formData.get("fecha_noticia")),
       noticiaUrl: asString(formData.get("url_noticia")),
       fuente: asString(formData.get("fuente"))
